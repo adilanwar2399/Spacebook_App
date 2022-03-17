@@ -9,13 +9,12 @@ class SearchScreen extends Component {
         this.state = {
             userInput: "",
             listData: [],
-            selectedUserID: 0,
+            offset: 0,
             textForChecks: "",
-            nextDisabled: true,
-            backDisabled: true,
-            friendSearch: false,
+            disabledNextPagination: true,
+            disabledPreviousPagination: true,
+            searchFriends: false,
             limit: 10,
-            offset: 0
 
         }
     }
@@ -32,38 +31,51 @@ class SearchScreen extends Component {
     
     getData = async (page) => {
 
+    //Here Pagination occurs if the value of the page is -1,0 or 1.
+    //Here if the value is 1 the page will move to the next one.
+    //If the value is 0 then the page will stay as it is.
+    //If the value is -1 then the page will move to previous page.
 
-        if(page == -1){
-            let temp = this.state.offset - this.state.limit
+    let offsetValue = this.state.offset
+    let limitValue = this.state.limit
+        if(page == 1){
+            //let temporaryStorageValue = this.state.offset + this.state.limit
+            let temporaryStorageValue = offsetValue + limitValue
             this.setState({
-                offset: temp,
-                nextDisabled: false
+                offset: temporaryStorageValue,
+                disabledPreviousPagination: false
             })
-            if(temp==0){
-                this.setState({
-                    backDisabled: true
-                })
-            }
         }else if(page ==0){
             this.setState({
                 offset: 0,
-                nextDisabled: false
+                disabledNextPagination: false
             })
-        }else if(page == 1){
-            let temp = this.state.offset + this.state.limit
+        }else if(page == -1){
+            //let temporaryStorageValue = this.state.offset - this.state.limit
+            let temporaryStorageValue = offsetValue - limitValue
             this.setState({
-                offset: temp,
-                backDisabled: false
+                offset: temporaryStorageValue,
+                disabledNextPagination: false
             }) 
+            if(temporaryStorageValue==0) {
+                this.setState({
+                    disabledPreviousPagination: true
+                })
+            }
         }
-        this.setState({textForChecks: ""})
-        let searchMethod = 'all'
-        if(this.state.friendSearch){
-            searchMethod = 'friends'
+        
+        this.setState({
+            textForChecks: ""
+        })
+
+        let searchProcedure = 'all'
+
+        if(this.state.searchFriends){
+            searchProcedure = 'friends'
         }
         if(this.state.userInput !== ""){
             const value = await AsyncStorage.getItem('@session_token');
-            return fetch(`http://localhost:3333/api/1.0.0/search?q=${this.state.userInput}&search_in=${searchMethod}&limit=${this.state.limit}&offset=${this.state.offset}`,{
+            return fetch(`http://localhost:3333/api/1.0.0/search?q=${this.state.userInput}&search_in=${searchProcedure}&limit=${limitValue}&offset=${offsetValue}`,{
                 'headers': {
                      'X-Authorization': value
                 }
@@ -84,16 +96,16 @@ class SearchScreen extends Component {
             })
             .then((responseJson) => {
                 console.log(responseJson.length)
-                if(responseJson.length < 5){
+                if(responseJson.length < 10){
                     this.setState({
                         listData: responseJson,
-                        limit: 5,
-                        nextDisabled: true
+                        limit: 10,
+                        disabledNextPagination: true
                     })
                 }else{
                     this.setState({
                         listData: responseJson,
-                        limit: 5
+                        limit: 10
                     })
                 }
             })
@@ -102,8 +114,8 @@ class SearchScreen extends Component {
             })
         }else{
             this.setState({
-                textForChecks: "You have not entered Text in the text box",
-                backDisabled: true
+                textForChecks: "Please enter text in the text box; text boxes can't be left empty",
+                disabledPreviousPagination: true
             })
         }
     }
@@ -119,86 +131,96 @@ class SearchScreen extends Component {
     render() {
         return(
             <View style={{backgroundColor: 'lightblue'}}>
-                <View style={styles.searchContainer}>
+                <View style={styles.searchContainerStyling}>
                     <Button
                         title="Search:"
                         onPress = {() => this.getData(0)}
                     />
                     <TextInput
-                        style = {styles.searchBoxStyle}
-                        placeholder="Enter name to search for"
+                        style = {styles.searchBoxStyling}
+                        placeholder="Enter name: "
                         onChangeText={(userInput) => this.setState({userInput})}
                         value={this.state.userInput}
                     />
                 </View>
-                <View style={styles.toggleContainer}>
+                <View style={styles.searchButtonContainer1Styling}>
+                    <Button
+                        title='Previous'
+                        onPress={() => this.getData(-1)}
+                        disabled={this.state.disabledPreviousPagination}
+                    />
+                </View>
+                <View style={styles.searchButtonContainer2Styling}>
+                    <Button
+                        title='Next'
+                        onPress={() => this.getData(1)}
+                        disabled={this.state.disabledNextPagination}
+                    />
+                </View> 
+                <View style={styles.searchToggleContainerStyling}>
                     <Text>Friends</Text>
                     <Switch
-                        trackColor={{ false: "#767577", true: "#81b0ff" }}
-                        thumbColor={this.state.friendSearch ? "#f5dd4b" : "#f4f3f4"}
-                        value={this.state.friendSearch}
-                        onValueChange = {(value) => this.setState({friendSearch: value})}
+                       //Allows the Toggle Button to switch from Friends to not friends
+                       //Allowing the search to work.
+                        trackColor={{ 
+                            true: "steelblue", 
+                            false: "black", 
+                        }}
+                        value={this.state.searchFriends}
+                        onValueChange = {(value) => this.setState({searchFriends: value})}
                         
                     />
-                    
                     <Text>{this.state.textForChecks}</Text>
                 </View>
                 <FlatList
                     data={this.state.listData}
                     renderItem={({item}) => (
-                        <View style={styles.searchItem}>
+                        <View style={styles.searchItemStyling}>
                         <TouchableOpacity
                             onPress={() => this.props.navigation.navigate('User',{id: item.user_id })}
                         >
-                        <Text style={styles.searchText}>{item.user_givenname} {item.user_familyname}</Text>
+                        <Text style={styles.searchTextStyling}>{item.user_givenname} {item.user_familyname}</Text>
                         </TouchableOpacity>
                         </View>
                     )}
-                />
-                <View style={styles.buttonContainer}>
-                    <Button
-                        title='Back'
-                        onPress={() => this.getData(-1)}
-                        disabled={this.state.backDisabled}
-                    />
-                    <Button
-                        title='Next'
-                        onPress={() => this.getData(1)}
-                        disabled={this.state.nextDisabled}
-                    />
-                </View>   
+                />  
             </View>
         );      
       }
 }
 
 const styles = StyleSheet.create({
-    searchContainer:{
+    searchContainerStyling:{
         flexDirection: 'row',
         height: 30,
     },
-    searchBoxStyle: {
-        width: 300
+    searchItemStyling: {
+        padding:15,
+        borderColor: 'slateblue',
+        borderWidth: 1,
+        borderRadius: 1
     },
-    toggleContainer: {
-        flexDirection: 'row',
+    searchTextStyling:{
+        textAlign: 'center',
+        fontSize: 18,
+    },
+    searchBoxStyling: {
+        width: 400
+    },
+    searchToggleContainerStyling: {
+        flexDirection: 'row-reverse',
         padding: 5
     },
-    buttonContainer: {
+    searchButtonContainer1Styling: {
         flexDirection: 'row',
         alignItems: 'flex-end',
         justifyContent: 'center'
     },
-    searchItem: {
-        padding:15,
-        borderColor: 'steelblue',
-        borderRadius: 1,
-        borderWidth: 1
+    searchButtonContainer2Styling: {
+        flexDirection: 'row-reverse',
+        alignItems: 'flex-end',
+        justifyContent: 'center'
     },
-    searchText:{
-        textAlign: 'center',
-        fontSize: 18,
-    }
 })
 
 export default SearchScreen;
