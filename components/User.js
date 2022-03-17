@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Text, Button, Image, StyleSheet, TextInput, FlatList, View, TouchableOpacity} from 'react-native';
+import {Text, Button, Image, StyleSheet, TextInput, FlatList, View, TouchableOpacity, ScrollView, TouchableWithoutFeedback } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { serverBase } from "../App";
 
@@ -15,6 +15,7 @@ class UserScreen extends Component{
             titleForLikes: "Like",
             textForChecks: "",
             friends: false, 
+            
         }
     }
     
@@ -175,75 +176,195 @@ class UserScreen extends Component{
     }
 
     render(){
-        if(!this.state.friends){
-            //Do something 
-            return(
-                <View>
-                    <Image
-                        source={{
-                            uri: this.state.photo,
-                        }}
-                        style = {{
-                            width: 400,
-                            height: 400,
-                            borderWidth: 5
-                        }}
-                    />
-                    <Text>{this.state.userInfo.user_givenname}</Text>
-                    <Button
-                        title="Add Friend"
-                        onPress = {() => this.addFriend()}
-                    />
-                    <Text>{this.state.textForChecks}</Text>
-                </View>
-            )
-        }else{
-            return(
-                <View>
-                    <Image
-                        source={{
-                            uri: this.state.photo,
-                        }}
-                        style = {{
-                            width: 400,
-                            height: 400,
-                            borderWidth: 5
-                        }}
-                    />
-                    <Text>{this.state.userInfo.user_givenname}</Text>
-                    <Text>Add Post</Text>
-                    <TextInput
-                        placeholder="What do you want to write about"
-                        onChangeText={(inputForPosts) => this.setState({inputForPosts})}
-                        value={this.state.inputForPosts}
-                    />
-                    <Text>{this.state.textForChecks}</Text>
-                    <Button
-                        title="Add Post"
-                        onPress={() => this.add_post()}
-                    />
-                    <FlatList
-                        data={this.state.listsOfPosts}
-                        renderItem={({item}) => (
-                            <View>
-                            <TouchableOpacity
-                                onPress={() => this.props.navigation.navigate('Posts',{item: item.post_id, userInfo: this.state.userInfo.user_id})}
-                            >
-                            <Text>{item.text}</Text>
-                            <Text>{item.numLikes} Likes</Text> 
-                                </TouchableOpacity> 
-                                {/* <Button
-                                    title={this.state.titleForLikes}
-                                    onPress={() => this.likePost(item)}
-                                /> */}
-                            </View>
-                        )}
-                    />
-                </View>
-            );
-        }
+        if(this.state.friends) 
+        {
+          return (
+          <View>
+            <ScrollView>
+              <View style={styles.containerDiv}>
+                  <Image
+                      source={{
+                          uri: this.state.photo,
+                      }}
+                      style = {styles.imagePhotoStyling}
+                  />
+                  <Text style={styles.stylingForNames}>{this.state.userInfo.first_name} {this.state.userInfo.last_name}</Text>
+              </View>
+              <View style={styles.buttonContainerDiv}>
+                  <Button
+                      title="Friends"
+                      onPress={() => this.props.navigation.navigate('Friends',{userID: this.state.userID})}
+                  />
+              </View>
+              <View style={styles.addPostContainer}> 
+                  <Text>Add Post</Text>
+                  <TextInput
+                      placeholder="Add a post"
+                      onChangeText={(postInput) => this.setState({postInput})}
+                      value={this.state.postInput}
+                  />
+                  <Text>{this.state.textForChecks}</Text>
+                  <Button
+                      title="Add Post"
+                      onPress={() => this.add_post()}
+                  />
+              </View>
+              <View >
+                  <TouchableWithoutFeedback>
+                  <FlatList
+                      data={this.state.postList}
+                      renderItem={({item}) => ( 
+                          <TouchableOpacity
+                              style={styles.postItem}
+                              onPress={() => this.props.navigation.navigate('Posts',{item: item.post_id, userInfo: this.state.userID, userName: this.state.userInfo.first_name})}
+                          >
+                              <Text>{item.text}</Text> 
+                              <Text>{item.numLikes} Likes</Text>
+                          </TouchableOpacity> 
+  
+                      )}
+                  />
+                  </TouchableWithoutFeedback>
+              </View>
+            </ScrollView>
+        </View>  
+       )
+      }else{
+        return(
+          <View>
+            <ScrollView>
+              <View style={styles.container}>
+                  <Image
+                    source={{
+                      uri: this.state.photo,
+                    }}
+                    style = {styles.imagePhotoStyling}
+                  />
+                  <Text style={styles.nameStyle}>{this.state.userInfo.first_name} {this.state.userInfo.last_name}</Text>
+              </View>
+              <Button
+              title="Add Friend"
+              onPress = {() => this.add_Friends()}
+              />
+              <Text>{this.state.textForChecks}</Text>            
+            </ScrollView>
+          </View>
+        );
+       } 
+        // if(!this.state.friends){
+        //     //Do something 
+        //     return(
+        //         <View>
+        //             <Image
+        //                 source={{
+        //                     uri: this.state.photo,
+        //                 }}
+        //                 style = {{
+        //                     width: 400,
+        //                     height: 400,
+        //                     borderWidth: 5
+        //                 }}
+        //             />
+        //             <Text>{this.state.userInfo.user_givenname}</Text>
+        //             <Button
+        //                 title="Add Friend"
+        //                 onPress = {() => this.addFriend()}
+        //             />
+        //             <Text>{this.state.textForChecks}</Text>
+        //         </View>
+        //     )
+        // }else{
+        //     return(
+        //         <View>
+        //             <Image
+        //                 source={{
+        //                     uri: this.state.photo,
+        //                 }}
+        //                 style = {{
+        //                     width: 400,
+        //                     height: 400,
+        //                     borderWidth: 5
+        //                 }}
+        //             />
+        //             <Text>{this.state.userInfo.user_givenname}</Text>
+        //             <Text>Add Post</Text>
+        //             <TextInput
+        //                 placeholder="What do you want to write about"
+        //                 onChangeText={(inputForPosts) => this.setState({inputForPosts})}
+        //                 value={this.state.inputForPosts}
+        //             />
+        //             <Text>{this.state.textForChecks}</Text>
+        //             <Button
+        //                 title="Add Post"
+        //                 onPress={() => this.add_post()}
+        //             />
+        //             <FlatList
+        //                 data={this.state.listsOfPosts}
+        //                 renderItem={({item}) => (
+        //                     <View>
+        //                     <TouchableOpacity
+        //                         onPress={() => this.props.navigation.navigate('Posts',{item: item.post_id, userInfo: this.state.userInfo.user_id})}
+        //                     >
+        //                     <Text>{item.text}</Text>
+        //                     <Text>{item.numLikes} Likes</Text> 
+        //                         </TouchableOpacity> 
+        //                         {/* <Button
+        //                             title={this.state.titleForLikes}
+        //                             onPress={() => this.likePost(item)}
+        //                         /> */}
+        //                     </View>
+        //                 )}
+        //             />
+        //         </View>
+        //     );
+        // }
     }
 
 }
 
+const styles = StyleSheet.create({
+    imagePhotoStyling: {
+        width: 200,
+        height: 200,
+    },
+    stylingForPostingItem: {
+        padding:15,
+        borderColor: 'slateblue',
+        borderRadius: 1,
+        borderWidth: 1,
+        margin: 5
+    },
+    addPostDivContainer:{
+        flex:1,
+        alignItems: 'center',
+        flexDirection: 'row',
+        margin: 0,
+        justifyContent: 'space-evenly',
+        backgroundColor: 'lightblue'
+    },
+    stylingForNames:{
+        flex:1,
+        width:130,
+        height: 110,
+        textAlign: 'center',
+        fontSize: 18,
+        
+    },
+    containerDiv: {
+        flex: 1,
+        height: 300,
+        width: 393,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',    
+    },
+    buttonContainerDiv: {
+        flex:1,
+        flexDirection:'row-reverse',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        
+    }
+  
+  })
 export default UserScreen;
