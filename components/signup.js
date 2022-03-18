@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Text, ScrollView, TextInput, Button, StyleSheet, View } from 'react-native-web';
+import { serverBase } from '../App';
 
 class SignupScreen extends Component{
     constructor(props){
@@ -17,32 +18,36 @@ class SignupScreen extends Component{
 
     verificationOfPassword() {
         //Validation here ensures that user fills in the details correctly - using Regex.
-        if(this.state.password.length > 8){
-            if(/\d/.test(this.state.password)){
-                if(/[A-Z]/.test(this.state.password)){
+        let passWord = this.state.password
+        // min 8 characters - can consist of [0-9] Integer digit values and atleast 1 Capitalized Letter [A-Z]
+        if(passWord.length > 8){
+            if(/\d/.test(passWord)){
+                if(/[A-Z]/.test(passWord)){
+
                     let temporaryFirstNameStorageString = String(this.state.first_name)
                     let temporaryLastNameStorageString = String(this.state.last_name)
-                    if(!this.state.password.includes(temporaryLastNameStorageString) && !this.state.password.includes(temporaryFirstNameStorageString)){
+
+                    if(!passWord.includes(temporaryLastNameStorageString) && !passWord.includes(temporaryFirstNameStorageString)){
                         return true;
                     }else{
                         this.setState({
-                            textForChecks: ": Error Names can't be used in Passwords \n"
+                            textForChecks: "Error : Error Names can't be used in Passwords \n"
                         })
                         return false   
                     }
                 }else{
                    this.setState({
-                        textForChecks: ": Passwords Imperatively must contain a Capitalized Letter \n"
+                        textForChecks: "Error: Passwords Imperatively must contain a Capitalized Letter \n"
                    })
                 }
             }else{
                 this.setState({
-                    textForChecks: ": Passwords Imperatively must contain an Numerical Value (Integer) \n"
+                    textForChecks: "Error: Passwords Imperatively must contain an Numerical Value (Integer) \n"
                 })
             }
         }else{
             this.setState({
-                textForChecks: ": Passwords Imperatively must be longer than 8 Characters \n"
+                textForChecks: "Error: Passwords Imperatively must be longer than 8 Characters \n"
             })
         }
     }
@@ -64,7 +69,7 @@ class SignupScreen extends Component{
             if(emailTemp.includes("@")) {  
                 if(this.verificationOfPassword()) {
                     if(passAltTemp == passwordTemp) {
-                            return fetch("http://localhost:3333/api/1.0.0/user", {
+                            return fetch(serverBase+"user", {
                                 method: 'post',
                                 headers: {
                                     'Content-Type': 'application/json'
@@ -89,18 +94,18 @@ class SignupScreen extends Component{
                             })
                         }else {
                             this.setState()({
-                                textForChecks: ": the Passwords must Match with one another."
+                                textForChecks: " Error: the Passwords must Match with one another."
                             })
                         }
                     }
                 }else{
                     this.setState({
-                      textForChecks: ": Invalid Email Address. Email Addresses Must contain an @."
+                      textForChecks: "Error: Invalid Email Address. Email Addresses Must contain an @."
                  })
             }
         }else{
             this.setState({
-              textForChecks: ": Text-Boxes have missing data."
+              textForChecks: "Error: Text-Boxes contain missing data."
             })
         }
     }       
