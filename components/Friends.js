@@ -190,22 +190,23 @@ class FriendScreen extends Component {
 const styles = StyleSheet.create({
   title: {
       color:'slateblue',
-      backgroundColor:'lightblue',
-      padding:10,
-      flex: 1,
       textAlign: 'center',
-      fontSize:25
-    },
-  friendObjects: {
-      padding:15,
-      borderColor: 'slateblue',
-      borderRadius: 1,
-      borderWidth: 1
+      fontSize:27,
+      backgroundColor:'lightblue',
+      padding:12,
+      flex: 1,
     },
   textStyleFriend:{
-      textAlign: 'center',
       fontSize: 18,
-  }
+      textAlign: 'center',
+      
+  },
+  friendObjects: {
+      borderRadius: 2,
+      borderWidth: 2,
+      padding:15,
+      borderColor: 'slateblue'
+    }
 })
 
 
