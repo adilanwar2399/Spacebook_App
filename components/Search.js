@@ -177,20 +177,20 @@ class SearchScreen extends Component {
                         value={this.state.userInput}
                     />
                 </View>
-                <View style={styles.searchButtonContainer1Styling}>
-                    <Button
-                        title='Previous'
-                        onPress={() => this.getData(-1)}
-                        disabled={this.state.disabledPreviousPagination}
-                    />
-                </View>
-                <View style={styles.searchButtonContainer2Styling}>
-                    <Button
-                        title='Next'
-                        onPress={() => this.getData(1)}
-                        disabled={this.state.disabledNextPagination}
-                    />
-                </View> 
+//                 <View style={styles.searchButtonContainer1Styling}>
+//                     <Button
+//                         title='Previous'
+//                         onPress={() => this.getData(-1)}
+//                         disabled={this.state.disabledPreviousPagination}
+//                     />
+//                 </View>
+//                 <View style={styles.searchButtonContainer2Styling}>
+//                     <Button
+//                         title='Next'
+//                         onPress={() => this.getData(1)}
+//                         disabled={this.state.disabledNextPagination}
+//                     />
+//                 </View> 
                 <FlatList
                     data={this.state.listData}
                     renderItem={({item}) => (
