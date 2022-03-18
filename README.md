@@ -16,4 +16,4 @@ Also, Regex was utilised for validation of passwords - traits like:
 Issues that I am aware of: 
 1 - The API does not allow the User to like/unlike their own posts - making it and essentiality that thi endpoint is met via viewing a friends' profile and therefore their post.
 
-Link to my Github:
+Link to my Github: https://github.com/adilanwar2399/Spacebook_App.git
