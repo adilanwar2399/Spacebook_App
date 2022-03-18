@@ -6,15 +6,16 @@ import { serverBase } from "../App";
 class UserScreen extends Component{
     constructor(props){
         super(props);
-
+        console.log(this.props)
+        
         this.state = {
             photo: null,
-            userInformation: this.props.route.params.item,
+            userInfo: {},
             inputForPosts: "",
             listsOfPosts: [],
             titleForLikes: "Like",
             textForChecks: "",
-            friends: false, 
+            arefriends: false, 
             
         }
     }
@@ -23,17 +24,50 @@ class UserScreen extends Component{
     componentDidMount() {
         this.unsubscribe = this.props.navigation.addListener('focus', () => {
           this.checkLoggedIn();
-          this.get_profile_photo();
-          this.get_posts();
+          let {id} = this.props.route.params
+          this.get_profile_photo(id);
+          this.get_posts(id);
+          this.getData(id);
         });
         
     }
+    getData = async (id) => {
+    const value = await AsyncStorage.getItem('@session_token');
+    //const idValue = await AsyncStorage.getItem('@user_id');
+    return fetch(serverBase + "user/" + id, {
+          'headers': {
+            'X-Authorization':  value
+          }
+        })
+        .then((response) => {
+            if(response.status === 200){
+                return response.json()
+            }else if(response.status === 401){
+              this.props.navigation.navigate("Login");
+            }else if(response.status === 404){
+              console.log("404 Error: Not found")
+            }else{
+                throw 'Something Unexpected has happened';
+            }
+        })
+        .then((responseJson) => {
+          console.log(responseJson)
+          this.setState({
+            isLoading: false,
+            userInfo: responseJson,
+          })
+          console.log(this.state.nameFirst)
+        })
+        .catch((error) => {
+            console.log(error);
+        })
+  }
     
-    get_posts = async () =>{
+    get_posts = async (id) =>{
         //Post data will be retrieved here - stored in a list
         //Data is being added - look @ postman - but it is not showing up after
         const token = await AsyncStorage.getItem("@session_token");
-        return fetch(serverBase+"user/" + this.state.userInfo.user_id + "/post", {
+        return fetch(serverBase+"user/" + id + "/post", {
           'method':'get',
           'headers': {
             'X-Authorization': token
@@ -52,7 +86,7 @@ class UserScreen extends Component{
                   friends: false
               })
           }else{
-              throw "Something went wunfortunately wrong"
+              throw "Something went unfortunately wrong"
           }
             
         })
@@ -93,7 +127,7 @@ class UserScreen extends Component{
                 }else if(response.status === 404){
                     console.log("404 Error: Not Found")
                 }else{
-                    throw "Somthing went unfortunately wrong"
+                    throw "Something went unfortunately wrong"
                 }
             })
             .catch((error) => {
@@ -112,9 +146,9 @@ class UserScreen extends Component{
         }
     };
 
-    get_profile_photo = async () =>{
+    get_profile_photo = async (id) =>{
         const token = await AsyncStorage.getItem("@session_token");
-        return fetch(serverBase+"user/"+ this.state.userInfo.user_id + "/photo", {
+        return fetch(serverBase+"user/"+ id + "/photo", {
             'method': 'get',
             'headers': {
                 'X-Authorization': token
@@ -176,7 +210,7 @@ class UserScreen extends Component{
     }
 
     render(){
-        if(this.state.friends) 
+        if(this.state.arefriends) 
         {
           return (
           <View>
@@ -200,8 +234,8 @@ class UserScreen extends Component{
                   <Text>Add Post</Text>
                   <TextInput
                       placeholder="Add a post"
-                      onChangeText={(postInput) => this.setState({postInput})}
-                      value={this.state.postInput}
+                      onChangeText={(inputForPosts) => this.setState({inputForPosts})}
+                      value={this.state.inputForPosts}
                   />
                   <Text>{this.state.textForChecks}</Text>
                   <Button
@@ -212,7 +246,7 @@ class UserScreen extends Component{
               <View >
                   <TouchableWithoutFeedback>
                   <FlatList
-                      data={this.state.postList}
+                      data={this.state.list}
                       renderItem={({item}) => ( 
                           <TouchableOpacity
                               style={styles.postItem}
@@ -244,82 +278,14 @@ class UserScreen extends Component{
               </View>
               <Button
               title="Add Friend"
-              onPress = {() => this.add_Friends()}
+              onPress = {() => this.addFriend()}
               />
               <Text>{this.state.textForChecks}</Text>            
             </ScrollView>
           </View>
         );
        } 
-        // if(!this.state.friends){
-        //     //Do something 
-        //     return(
-        //         <View>
-        //             <Image
-        //                 source={{
-        //                     uri: this.state.photo,
-        //                 }}
-        //                 style = {{
-        //                     width: 400,
-        //                     height: 400,
-        //                     borderWidth: 5
-        //                 }}
-        //             />
-        //             <Text>{this.state.userInfo.user_givenname}</Text>
-        //             <Button
-        //                 title="Add Friend"
-        //                 onPress = {() => this.addFriend()}
-        //             />
-        //             <Text>{this.state.textForChecks}</Text>
-        //         </View>
-        //     )
-        // }else{
-        //     return(
-        //         <View>
-        //             <Image
-        //                 source={{
-        //                     uri: this.state.photo,
-        //                 }}
-        //                 style = {{
-        //                     width: 400,
-        //                     height: 400,
-        //                     borderWidth: 5
-        //                 }}
-        //             />
-        //             <Text>{this.state.userInfo.user_givenname}</Text>
-        //             <Text>Add Post</Text>
-        //             <TextInput
-        //                 placeholder="What do you want to write about"
-        //                 onChangeText={(inputForPosts) => this.setState({inputForPosts})}
-        //                 value={this.state.inputForPosts}
-        //             />
-        //             <Text>{this.state.textForChecks}</Text>
-        //             <Button
-        //                 title="Add Post"
-        //                 onPress={() => this.add_post()}
-        //             />
-        //             <FlatList
-        //                 data={this.state.listsOfPosts}
-        //                 renderItem={({item}) => (
-        //                     <View>
-        //                     <TouchableOpacity
-        //                         onPress={() => this.props.navigation.navigate('Posts',{item: item.post_id, userInfo: this.state.userInfo.user_id})}
-        //                     >
-        //                     <Text>{item.text}</Text>
-        //                     <Text>{item.numLikes} Likes</Text> 
-        //                         </TouchableOpacity> 
-        //                         {/* <Button
-        //                             title={this.state.titleForLikes}
-        //                             onPress={() => this.likePost(item)}
-        //                         /> */}
-        //                     </View>
-        //                 )}
-        //             />
-        //         </View>
-        //     );
-        // }
     }
-
 }
 
 const styles = StyleSheet.create({
