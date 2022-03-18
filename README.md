@@ -1,6 +1,6 @@
 # Spacebook_App
 Spacebook is an App for the Mobile App Development Course. Essentially it is a Facebook Clone - that is made in RN (React Native). 
-React Native allows the app to be created  - using an API - for a web service that is already existent  
+React Native allows the app to be created  - using an API - for a web service. 
 
 This code follows the guidelines provided by Linter - which allows syntactical errors (grammatical coding error) and this lead me to iron out and polish my code as much as I could.
 Linter allowed me to keep away from many major errors as a result. Code Alignment was decent as a result.
