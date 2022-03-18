@@ -17,7 +17,7 @@ class UserUpdateScreen extends Component {
             last_name: "",
             email: "",
             password_check: "",
-            textForChecks:""
+            textForChecks: ""
         };
     }
     
@@ -27,7 +27,7 @@ class UserUpdateScreen extends Component {
           this.getData();
         });
       
-        //this.updateItem();
+        //this.updateUserItem();
       }
     
       componentWillUnmount() {
@@ -37,7 +37,7 @@ class UserUpdateScreen extends Component {
       getData = async () => {
         const token = await AsyncStorage.getItem('@session_token');
         const id = await AsyncStorage.getItem('@user_id');
-        return fetch("http://localhost:3333/api/1.0.0/user/" + id,{
+        return fetch( serverBase+"user/" + id,{
           'method': 'get',
           'headers': {
             'X-Authorization': token,
@@ -101,13 +101,20 @@ class UserUpdateScreen extends Component {
               }
         }
 
+        // Password Validation Checks to see whether the Password is a new one or not.
         if (this.state.password != this.state.orig_password) {
             to_send['password'] = (this.state.password);
         }
 
+        // Checks to see whether the password is empty or not; 
+        // if it is empty then check to see whether the passwords have names inside it.
+        // If any one of the first names or second names are inside it then the passwords can't be updated.
         if(this.state.password_check != "" && this.state.password != ""){
+            
             let temporaryFirstNameStorageString 
             let temporaryLastNameStorageString
+            let passwordMain = this.state.password
+            let passwordCheck = this.state.passwordCheck
       
             if(changingFirstName){
               temporaryFirstNameStorageString = this.state.first_name
@@ -120,31 +127,37 @@ class UserUpdateScreen extends Component {
             }else{
               temporaryLastNameStorageString = this.state.orig_last_name
             }
-           //Password Validation using regex - to determine the constraints to update the fields.
-            if(this.state.password.length > 8){
-                if(/\d/.test(this.state.password)){
-                if(/[A-Z]/.test(this.state.password)){
-                    if(!this.state.password.includes(temporaryLastNameStorageString) && !this.state.password.includes(temporaryFirstNameStorageString)){
-                    if(this.state.password === this.state.password_check){
-                        to_send['password'] = this.state.password;
+           
+            //Password Validation using regex which allows the user to input the data
+            // in the field textboxes correctly - min 8 characters for password
+            // Capitalised letters from [A-Z} will be used atleast once, 
+            // Digits ranging from 0-9 will be used. 
+            // Temp variables storing last name and first names.
+
+            if(passwordMain.length > 8){
+                if(/\d/.test(passwordMain)){
+                    if(/[A-Z]/.test(passwordMain)){
+                        if(!passwordMain.includes(temporaryLastNameStorageString) && !passwordMain.includes(temporaryFirstNameStorageString)){
+                            if(passwordMain === passwordCheck){
+                                to_send['password'] = passwordMain;
+                            }else{
+                                temporaryStorageString = temporaryStorageString + " Error: Error the Passwords that you have entered need to match! \n"
+                                validationAuthorization = false
+                            }
+                        }else{
+                        temporaryLastNameStorageString = temporaryLastNameStorageString + " Error: Error Names can't be used in Passwords \n"
+                        validationAuthorization = false
+                        }
                     }else{
-                        temporaryStorageString = temporaryStorageString + ": Error the Passwords that you have entered need to match! \n"
+                        temporaryStorageString = temporaryStorageString + "Error: Passwords Imperatively must contain a Capitalized Letter [A-Z] \n"
                         validationAuthorization = false
                     }
-                    }else{
-                    temporaryLastNameStorageString = temporaryLastNameStorageString + ": Error Names can't be used in Passwords \n"
-                    validationAuthorization = false
-                    }
                 }else{
-                    temporaryStorageString = temporaryStorageString + ": Passwords Imperatively must contain a Capitalized Letter \n"
-                    validationAuthorization = false
-                }
-                }else{
-                temporaryStorageString = temporaryStorageString + ": Passwords Imperatively must contain an Numerical Value (Integer) \n"
+                temporaryStorageString = temporaryStorageString + "Error: Passwords Imperatively must contain an Numerical Value [1-9] (Integer) \n"
                 validationAuthorization = false
                 }
             }else{
-                temporaryStorageString = temporaryStorageString + ": Passwords Imperatively must be longer than 8 Characters \n"
+                temporaryStorageString = temporaryStorageString + "Error: Passwords Imperatively must be longer than 8 Characters \n"
                 validationAuthorization = false
             }
             }
@@ -165,23 +178,23 @@ class UserUpdateScreen extends Component {
             })
                 .then((response) => {
                     if(response.status ===200){
-                    console.log("Item has been updated successfully") 
-                    this.props.navigation.navigate('ProfileScreen')
+                        console.log("Item has been updated successfully") 
+                        this.props.navigation.navigate('ProfileScreen')
                     }else if(response.status === 401){
-                    this.props.navigation.navigate("login");
+                        this.props.navigation.navigate("login");
                     }else if(response.status === 403){
-                    console.log("Error 403: Forbidden Request - Access Deniec")
+                        console.log("Error 403: Forbidden Request - Access Deniec")
                     }else if(response.status === 404){
-                    console.log("404 Error: Not Found")
+                        console.log("404 Error: Not Found")
                     }else{
-                    throw "Something went wrong"
+                        throw "Something went wrong"
                     }
                 })
                 .catch((error) => {
                     console.log(error);
                 })
             }else {
-                this.setState(textForChecks,temporaryStorageString)
+                this.setState({textForChecks:temporaryStorageString})
             }
     }
 
@@ -199,7 +212,7 @@ class UserUpdateScreen extends Component {
                 <Text style={styles.title}>S P A C E B O O K</Text>
                 <Text style={styles.title}>APP</Text>
         
-                <View style={styles.inputFormStyle}>
+                <View style={styles.itemsFormStyle}>
                 <Text style={styles.labelsFormStyle}>First Name</Text>
                 <TextInput
                     style={styles.inputFormStyle}
@@ -208,7 +221,7 @@ class UserUpdateScreen extends Component {
                 />
                 </View>
         
-                <View style={styles.itemsFormstyle}>
+                <View style={styles.itemsFormStyle}>
                 <Text style={styles.labelsFormStyle}>Last Name</Text>
                 <TextInput
                     defaultValue={this.state.orig_last_name}
@@ -216,7 +229,7 @@ class UserUpdateScreen extends Component {
                 />
                 </View>
         
-                <View style={styles.itemsFormstyle}>
+                <View style={styles.itemsFormStyle}>
                 <Text style={styles.labelsFormStyle}>Email</Text>
                 <TextInput
                     style={styles.inputFormStyle}
@@ -224,8 +237,8 @@ class UserUpdateScreen extends Component {
                     defaultValue={this.state.orig_email}
                 />
                 </View>
-        
-                <View style={styles.itemsFormstyle}>
+
+                <View style={styles.itemsFormStyle}>
                 <Text style={styles.labelsFormStyle}>Update Your Password</Text>
                 <TextInput
                     style={styles.inputFormStyle}
@@ -233,24 +246,14 @@ class UserUpdateScreen extends Component {
                     onChangeText={(value) => this.setState({password: value})}
                 />
                 </View>
-        
-                <View style={styles.itemsFormstyle}>
-                <Text style={styles.labelsFormStyle}> Password Verification</Text>
-                <TextInput
-                    style={styles.inputFormStyle}
-                    placeholder="Password Here"
-                    onChangeText={(value) => this.setState({password_check: value})}
+                <Button
+                title="Update Display Photo"
+                onPress={() => this.props.navigation.navigate('Photo Capture')}
                 />
-                </View>
                 <Button
                 title="Save Information"
                 onPress={() => this.updateUserItem()}
                 />
-                <Button
-                title="Update Profile Photo"
-                onPress={() => this.props.navigation.navigate('Photo Capture')}
-                />
-                
                 <Text>{this.state.textForChecks}</Text>
             </ScrollView>    
         </View>
@@ -259,66 +262,28 @@ class UserUpdateScreen extends Component {
 }
 const styles = StyleSheet.create({
     title: {
-      color:'steelblue',
+      fontSize: 25,
+      color:'slateblue',
       backgroundColor:'lightblue',
       padding:10,
       flex: 1,
       justifyContent: 'center',
-      fontSize:25
     },
     inputFormStyle: {
         borderWidth:1,
-        borderColor: 'lightblue',
         borderRadius:5,
+        borderColor: 'lightblue',
     },
-    itemsFormstyle: {
-      padding:25,
-      borderColor: 'steelblue',
+    itemsFormStyle: {
+      padding: 25,
+      borderColor: 'slateblue',
       borderRadius: 3,
       borderWidth: 1
     },
     labelsFormStyle: {
-      fontSize:15,
-      color:'steelblue'
-    },
+      fontSize:18,
+      color:'slateblue'
+    }
   })
 
 export default UserUpdateScreen;
-
-    // render() {
-    //     return (
-    //         <View>
-    //             <Text>Update an Item</Text>
-
-    //             <TextInput
-    //                 placeholder="Enter first name..."
-    //                 onChangeText={(first_name) => this.setState({ first_name })}
-    //                 value={this.state.first_name}
-    //                 style={{padding:5, borderWidth:1, margin:5}}
-    //             />
-    //             <TextInput
-    //                 placeholder="Enter last name..."
-    //                 onChangeText={(last_name) => this.setState({ last_name })}
-    //                 value={this.state.last_name}
-    //                 style={{padding:5, borderWidth:1, margin:5}}
-    //             />
-    //             <TextInput
-    //                 placeholder="Enter email..."
-    //                 onChangeText={(email) => this.setState({ email })}
-    //                 value={this.state.email}
-    //                 style={{padding:5, borderWidth:1, margin:5}}
-    //             />
-    //             <TextInput
-    //                 placeholder="Enter password..."
-    //                 onChangeText={(password) => this.setState({ password })}
-    //                 value={this.state.password}
-    //                 style={{padding:5, borderWidth:1, margin:5}}
-    //             />
-    //             <Button
-    //                 title="Update"
-    //                 onPress={() => this.updateItem()}
-    //                 style={{padding:5, borderWidth:1, margin:5}}
-    //             />
-    //         </View>
-    //     );
-    // }
