@@ -150,25 +150,25 @@ class FriendRequestsScreen extends Component{
 }
 
 const styles = StyleSheet.create({
+    title: {
+        color:'slateblue',
+        textAlign: 'center',
+        fontSize:22,
+        backgroundColor:'lightblue',
+        padding:12,
+        flex: 1
+      },
     containerForRequestsDiv: {
         flex:1,
-        alignItems: 'center',
-        flexDirection: 'row',
         margin: 0,
+        flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'space-evenly',
         backgroundColor: 'lightblue'
     },
     stylesForNames:{
-        fontSize: 18,
+        fontSize: 19,
     },
-    title: {
-        color:'slateblue',
-        backgroundColor:'lightblue',
-        padding:10,
-        flex: 1,
-        textAlign: 'center',
-        fontSize:25
-      },
 })
 
 export default FriendRequestsScreen;
