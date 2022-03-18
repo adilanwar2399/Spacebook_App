@@ -16,7 +16,6 @@ class FriendScreen extends Component {
       userID: this.props.route.params.userID,
       listData: []
 
-
     }
   }
 
@@ -26,8 +25,8 @@ class FriendScreen extends Component {
       this.getData;
     });
   
-    // this.getFriends();
-    // this.getFriendsRequests();
+    this.getFriends();
+    this.getFriendsRequests();
   }
 
   componentWillUnmount() {
@@ -77,150 +76,111 @@ class FriendScreen extends Component {
     })
 }
 
-  // getFriends = async () => {
-  //   const value = await AsyncStorage.getItem('@session_token');
-  //   const idValue = await AsyncStorage.getItem('@user_id');
-  //   return fetch("http://localhost:3333/api/1.0.0/user/" + idValue + "/friends", {
-  //     'method': 'get', 'headers': {
-  //           'X-Authorization':  value,
-  //           'Content-Type': 'application/json'
-  //         }
-  //       })
-  //       .then((response) => {
-  //           if(response.status === 200){
-  //               return response.json()
-  //           }else if(response.status === 401){
-  //             this.props.navigation.navigate("Login");
-  //           }else if(response.status === 403){
-  //               console.log("Only Your friends can be shown");
-  //           }else if(response.status === 404){
-  //               console.log("No Friends to show ")
-  //           }else if(response.status === 500){
-  //               console.log("There is a Server Error")
-  //           }else{
-  //               throw 'Something Unexpected has happened';
-  //           }  
-  //       })
-  //       .then((responseJson) => {
-  //         this.setState({
-  //           isLoading: false,
-  //           friendsListData: responseJson
-  //         })
-  //       })
-  //       .catch((error) => {
-  //           console.log("Surprisingly something unexpected happened")
-  //           console.log(error);
-  //       })
-  // }
+  getFriends = async () => {
+    const value = await AsyncStorage.getItem('@session_token');
+    const idValue = await AsyncStorage.getItem('@user_id');
+    return fetch("http://localhost:3333/api/1.0.0/user/" + idValue + "/friends", {
+      'method': 'get', 'headers': {
+            'X-Authorization':  value,
+            'Content-Type': 'application/json'
+          }
+        })
+        .then((response) => {
+            if(response.status === 200){
+                return response.json()
+            }else if(response.status === 401){
+              this.props.navigation.navigate("Login");
+            }else if(response.status === 403){
+                console.log("Only Your friends can be shown");
+            }else if(response.status === 404){
+                console.log("No Friends to show ")
+            }else if(response.status === 500){
+                console.log("There is a Server Error")
+            }else{
+                throw 'Something Unexpected has happened';
+            }  
+        })
+        .then((responseJson) => {
+          this.setState({
+            isLoading: false,
+            friendsListData: responseJson
+          })
+        })
+        .catch((error) => {
+            console.log("Surprisingly something unexpected happened")
+            console.log(error);
+        })
+  }
 
-  // getFriendsRequests = async () => {
-  //   const value = await AsyncStorage.getItem('@session_token');
-  //   const idValue = await AsyncStorage.getItem('@session_id');
-  //   return fetch("http://localhost:3333/api/1.0.0/friendrequests", {
-  //         'headers': {
-  //           'X-Authorization':  value
-  //         }
-  //       })
-  //       .then((response) => {
-  //           if(response.status === 200){
-  //               return response.json()
-  //           }else if(response.status === 401){
-  //             this.props.navigation.navigate("Login");
-  //           }else if(response.status === 403){
-  //             console.log("You can only view the friends of yourself or your friends");
-  //           }else if(response.status === 500){
-  //             console.log("There is a Server Error")  
-  //           }else{
-  //               throw 'Something went wrong';
-  //           }
-  //       })
-  //       .then((responseJson) => {
-  //         this.setState({
-  //           isLoading: false,
-  //           listData: responseJson
-  //         })
-  //       })
-  //       .catch((error) => {
-  //           console.log("Something has gone wrong")
-  //           console.log(error);
-  //       })
-  // }
+  getFriendsRequests = async () => {
+    const value = await AsyncStorage.getItem('@session_token');
+    const idValue = await AsyncStorage.getItem('@session_id');
+    return fetch("http://localhost:3333/api/1.0.0/friendrequests", {
+          'headers': {
+            'X-Authorization':  value
+          }
+        })
+        .then((response) => {
+            if(response.status === 200){
+                return response.json()
+            }else if(response.status === 401){
+              this.props.navigation.navigate("Login");
+            }else if(response.status === 403){
+              console.log("You can only view the friends of yourself or your friends");
+            }else if(response.status === 500){
+              console.log("There is a Server Error")  
+            }else{
+                throw 'Something went wrong';
+            }
+        })
+        .then((responseJson) => {
+          this.setState({
+            isLoading: false,
+            listData: responseJson
+          })
+        })
+        .catch((error) => {
+            console.log("Something has gone wrong")
+            console.log(error);
+        })
+  }
 
   render() {
-
-    // if (this.state.isLoading){
-    //   return (
-    //     <View
-    //       style={{
-    //         flex: 1,
-    //         flexDirection: 'column',
-    //         justifyContent: 'center',
-    //         alignItems: 'center',
-    //       }}>
-    //       <Text>Loading..</Text>
-    //     </View>
-    //   );
-    // }else{
-    //   console.log(this.state.friendsListData)
-    //   console.log(this.state.friendRequestsData)
-
-      // return (
-      //   <View style={{backgroundColor: 'lightblue'}}>
-      //     <ScrollView>
-      //       <Button
-      //               title='Friend Requests'
-      //               onPress={() => this.props.navigation.navigate('FriendRequestsScreen')}
-      //           />
-      //       <Text style={styles.title}>Online Friends Count:</Text>
-      //       <FlatList
-      //             data={this.state.friendsListData}
-      //             renderItem={({item}) => (
-      //                 <View>
-      //                   <Text> {item.user_id} {item.user_givenname} {item.user_familyname}</Text>
-      //                 </View>
-      //             )}
-      //             keyExtractor={(item,index) => item.user_id.toString()}
-      //           />
-      //           <Text style={styles.title}>Number Of Friend Requests:</Text>
-      //       <FlatList
-      //             data={this.state.friendRequestsData}
-      //             renderItem={({item}) => (
-      //                 <View>
-      //                   <Text> {item.user_id} {item.first_name} {item.last_name}</Text>
-      //                 </View>
-      //             )}
-      //             keyExtractor={(item,index) => item.user_id.toString()}
-      //           />
-      //      <Text style={styles.title}>Friends</Text>
-      //         <FlatList
-      //             data={this.state.listData}
-      //             renderItem={({item}) => (
-      //               <View style={styles.friendObjects}>
-      //               <TouchableOpacity
-      //                 onPress={() => this.props.navigation.navigate('ProfileScreen',{id: item.user_id})}
-      //               >
-      //               <Text style={styles.textStyleFriend}>{item.user_givenname} {item.user_familyname}</Text>
-      //               </TouchableOpacity>
-      //               </View>
-      //             )}
-      //         />      
-      //     </ScrollView>
-      //   </View>
       return (
         <View style={{backgroundColor: 'lightblue'}}>
             <Text style={styles.title}>Friends</Text>
-            <FlatList
-                data={this.state.listData}
-                renderItem={({item}) => (
-                    <View style={styles.friendObjects}>
-                    <TouchableOpacity
-                        onPress={() => this.props.navigation.navigate('userScreen',{id: item.user_id})}
-                    >
-                    <Text style={styles.textStyleFriend}>{item.user_givenname} {item.user_familyname}</Text>
-                    </TouchableOpacity>
-                    </View>
-                )}
-            />
+            <ScrollView>
+              <FlatList
+                  data={this.state.friendsListData}
+                  renderItem={({item}) => (
+                      <View style={styles.friendObjects}>
+                      <TouchableOpacity
+                          onPress={() => this.props.navigation.navigate('User',{id: item.user_id})}
+                      >
+                      <Text style={styles.textStyleFriend}>{item.user_givenname} {item.user_familyname}</Text>
+                      </TouchableOpacity>
+                      </View>
+                  )}
+              />
+            </ScrollView>
+            <ScrollView>
+                <Button
+                    title='Friend Requests'
+                    onPress={() => this.props.navigation.navigate('Friend Requests')}
+                />
+              <FlatList
+                  data={this.state.listData}
+                  renderItem={({item}) => (
+                      <View style={styles.friendObjects}>
+                      <TouchableOpacity
+                          onPress={() => this.props.navigation.navigate('User',{id: item.user_id})}
+                      >
+                      <Text style={styles.textStyleFriend}>{item.user_givenname} {item.user_familyname}</Text>
+                      </TouchableOpacity>
+                      </View>
+                  )}
+              />
+            </ScrollView>
         </View>
         
       );
