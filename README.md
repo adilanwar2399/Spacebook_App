@@ -14,6 +14,6 @@ Also, Regex was utilised for validation of passwords - traits like:
 \/d/ , /[A-Z]/\ were used to enable me to add password constraints of Integer Digit Values and Capitalized Letters - as well as the Character limits for passwords.
 
 Issues that I am aware of: 
-1 - The API does not allow the User to like/unlike their own posts - making it and essentiality that thi endpoint is met via viewing a friends' profile and therefore their post.
+1 - The API does not allow the User to like/unlike their own posts - making it and essentiality that the endpoint is met via viewing a friends' profile and therefore their post.
 
 Link to my Github: https://github.com/adilanwar2399/Spacebook_App.git
