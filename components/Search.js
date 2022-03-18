@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Text, Button, TextInput, FlatList, View, Switch, TouchableOpacity, StyleSheet } from 'react-native-web';
+import { serverBase } from '../App';
 
 class SearchScreen extends Component {
     constructor(props){
@@ -9,6 +10,7 @@ class SearchScreen extends Component {
         this.state = {
             userInput: "",
             listData: [],
+            selectedUserID: 0,
             offset: 0,
             textForChecks: "",
             disabledNextPagination: true,
@@ -31,10 +33,12 @@ class SearchScreen extends Component {
     
     getData = async (page) => {
 
-    //Here Pagination occurs if the value of the page is -1,0 or 1.
-    //Here if the value is 1 the page will move to the next one.
-    //If the value is 0 then the page will stay as it is.
-    //If the value is -1 then the page will move to previous page.
+    //Here Pagination should occur when the value of the page is -1,0 or 1.
+    //Here if the value is 1 the page should move to the next one.
+    //If the value is 0 then the page should stay as it is.
+    //If the value is -1 then the page should move to previous page.
+    
+    //Pagination is not currently working: attempt to fix it later.
 
     let offsetValue = this.state.offset
     let limitValue = this.state.limit
@@ -120,6 +124,36 @@ class SearchScreen extends Component {
         }
     }
     
+    addFriend = async (user_id) =>{
+        //Send a friend request.
+        const value = await AsyncStorage.getItem('@session_token');
+        //const id = await AsyncStorage.getItem('user_id');
+        
+        return fetch(serverBase+"user/"+user_id+"/friends",{
+            'method': 'post',
+            'headers' : {
+                    'X-Authorization': value
+            }
+        })
+        .then((response) => {
+            if(response.status ===200){
+                console.log("Friend request has successfully been sent")
+            }else if(response.status === 401){
+                this.props.navigation.navigate("Login");
+            }else if(response.status === 403){
+                this.setState({textForChecks:"Friend Request has already been sent to this user"})
+            }else if(response.status === 404){
+                console.log('404 Error: Not found')
+            }else{
+                console.log("Something went wrong")
+            }
+        })
+        .catch((error) => {
+            console.log(error);
+        })
+        
+    }
+    
     checkLoggedIn = async () => {
         const value = await AsyncStorage.getItem('@session_token');
         if(value == null){
@@ -157,30 +191,14 @@ class SearchScreen extends Component {
                         disabled={this.state.disabledNextPagination}
                     />
                 </View> 
-                <View style={styles.searchToggleContainerStyling}>
-                    <Text>Friends</Text>
-                    <Switch
-                       //Allows the Toggle Button to switch from Friends to not friends
-                       //Allowing the search to work.
-                        trackColor={{ 
-                            true: "steelblue", 
-                            false: "black", 
-                        }}
-                        value={this.state.searchFriends}
-                        onValueChange = {(value) => this.setState({searchFriends: value})}
-                        
-                    />
-                    <Text>{this.state.textForChecks}</Text>
-                </View>
                 <FlatList
                     data={this.state.listData}
                     renderItem={({item}) => (
                         <View style={styles.searchItemStyling}>
-                        <TouchableOpacity
-                            onPress={() => this.props.navigation.navigate('User',{id: item.user_id })}
-                        >
+                        {/* <TouchableOpacity onPress={() => this.props.navigation.navigate('User',{id: item.user_id })}> */}
                         <Text style={styles.searchTextStyling}>{item.user_givenname} {item.user_familyname}</Text>
-                        </TouchableOpacity>
+                        <Button onPress={() => this.addFriend(item.user_id)}>Add Friend</Button>
+                        {/* </TouchableOpacity> */}
                         </View>
                     )}
                 />  
@@ -207,10 +225,6 @@ const styles = StyleSheet.create({
     searchBoxStyling: {
         width: 400
     },
-    searchToggleContainerStyling: {
-        flexDirection: 'row-reverse',
-        padding: 5
-    },
     searchButtonContainer1Styling: {
         flexDirection: 'row',
         alignItems: 'flex-end',
@@ -221,6 +235,10 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
         justifyContent: 'center'
     },
+    addFriendButton: {
+        color: 'slateblue'
+    }
+
 })
 
 export default SearchScreen;
