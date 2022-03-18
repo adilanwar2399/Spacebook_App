@@ -19,6 +19,7 @@ class ProfileScreen extends Component {
       titleForLikes: "Like",
       userInfo: [], 
       textForChecks: "",
+      selectionOfUserID: 0
     }
   }
 
@@ -148,6 +149,61 @@ class ProfileScreen extends Component {
     })
   }
 
+  likePosts = async (user_id, post_id) => {
+    const value = await AsyncStorage.getItem('@session_token');
+    const valueId = await AsyncStorage.getItem('@user_id');
+        return fetch(serverBase + "user/" +valueId+ "/post/" +post_id+ "/like", {
+        method: 'Post',
+        headers: {
+            'X-Authorization': value 
+        }
+    })
+    .then((response) =>{
+        if(response.status === 200){
+            console.log("200: Good Respose")
+        }else if(response.status === 401){
+            this.props.navigation.navigate("Login")
+        }else if(response.status === 403){
+            console.log("403 Forbidden Request; restricted access ")
+        }else{
+            throw "Something went wrong"
+        }
+    })
+    .then((responseJson) => {
+        console.log('Liked: ', responseJson)
+    })
+    .catch((error) => {
+        console.log(error)
+    })
+}
+
+  unLikePosts = async (user_id, post_id) => {
+    const value = await AsyncStorage.getItem('@session_token');
+    const idValue = await AsyncStorage.getItem('@user_id');
+    return fetch(serverBase + "user/" +idValue+ "/post/" +post_id+ "/like", {
+      method: 'Delete',
+      headers: {
+        'X-Authorization': value 
+    }
+  })
+    .then((response) =>{
+        if(response.status === 200){
+            console.log("200: Good Respose")
+        }else if(response.status === 401){
+            this.props.navigation.navigate("Login")
+        }else if(response.status === 403){
+            console.log("403 Forbidden Request; restricted access ")
+        }else{
+            throw "Something went wrong"
+        }
+    })
+    .then((responseJson) => {
+        console.log('Un-Liked: ', responseJson)
+    })
+    .catch((error) => {
+        console.log(error)
+    })
+  }
   add_post = async () => {
     this.setState({
       textForChecks: ""
@@ -223,7 +279,7 @@ class ProfileScreen extends Component {
       return (
         <View>
           <ScrollView>
-            <View style={styles.container}>
+            <View style={styles.containerDiv}>
               <Image
                 source={{
                   uri: this.state.photo,
@@ -232,17 +288,17 @@ class ProfileScreen extends Component {
               />
               <Text style={styles.stylingForNames}>{this.state.userInfo.first_name} {this.state.userInfo.last_name}</Text>
             </View>
-            <View style={styles.buttonContainer}>
+            <View style = {styles.buttonContainerDiv}>
               <Button
                 title='Friends'
                 onPress={() => this.props.navigation.navigate('Friends',{userID: this.state.userID})}
                 />
               <Button
-                name='Edit'
+                title='Edit'
                 onPress={() => this.props.navigation.navigate('User Update')}
               />
             </View>
-            <View style={styles.addPostContainer}>
+            <View style={styles.addPostDivContainer}>
                 <Text>Add Post</Text>
                   <TextInput
                     placeholder="Add posts"
@@ -271,89 +327,27 @@ class ProfileScreen extends Component {
                      )}
                   />
               </View>
+              <View >
+                <Text>User ID: {this.state.userInfo.user_id} </Text>
+              </View>
+              <View >
+                <Text>Full Name: {this.state.userInfo.first_name} {this.state.userInfo.last_name}</Text>
+              </View>
+              <View>
+                <Text>Email ID: {this.state.userInfo.email}</Text>
+              </View>
           </ScrollView>  
         </View>
       );
-
-    //   if(this.state.areFriends) 
-    //   {
-    //     return (
-    //     <View>
-    //       <ScrollView>
-    //         <View style={styles.containerDiv}>
-    //             <Image
-    //                 source={{
-    //                     uri: this.state.photo,
-    //                 }}
-    //                 style = {styles.imagePhotoStyling}
-    //             />
-    //             <Text style={styles.stylingForNames}>{this.state.userInfo.first_name} {this.state.userInfo.last_name}</Text>
-    //         </View>
-    //         <View style={styles.buttonContainerDiv}>
-    //             <Button
-    //                 title="Friends"
-    //                 onPress={() => this.props.navigation.navigate('Friends',{userID: this.state.userID})}
-    //             />
-    //         </View>
-    //         <View style={styles.addPostContainer}> 
-    //             <Text>Add Post</Text>
-    //             <TextInput
-    //                 placeholder="Add a post"
-    //                 onChangeText={(postInput) => this.setState({postInput})}
-    //                 value={this.state.postInput}
-    //             />
-    //             <Text>{this.state.textForChecks}</Text>
-    //             <Button
-    //                 title="Add Post"
-    //                 onPress={() => this.add_post()}
-    //             />
-    //         </View>
-    //         <View >
-    //             <TouchableWithoutFeedback>
-    //             <FlatList
-    //                 data={this.state.postList}
-    //                 renderItem={({item}) => ( 
-    //                     <TouchableOpacity
-    //                         style={styles.postItem}
-    //                         onPress={() => this.props.navigation.navigate('Posts',{item: item.post_id, userInfo: this.state.userID, userName: this.state.userInfo.first_name})}
-    //                     >
-    //                         <Text>{item.text}</Text> 
-    //                         <Text>{item.numLikes} Likes</Text>
-    //                     </TouchableOpacity> 
-
-    //                 )}
-    //             />
-    //             </TouchableWithoutFeedback>
-    //         </View>
-    //       </ScrollView>
-    //   </View>  
-    //  )
-    // }else{
-    //   return(
-    //     <View>
-    //       <ScrollView>
-    //         <View style={styles.container}>
-    //             <Image
-    //               source={{
-    //                 uri: this.state.photo,
-    //               }}
-    //               style = {styles.imagePhotoStyling}
-    //             />
-    //             <Text style={styles.nameStyle}>{this.state.userInfo.first_name} {this.state.userInfo.last_name}</Text>
-    //         </View>
-    //         <Button
-    //         title="Add Friend"
-    //         onPress = {() => this.add_Friends()}
-    //         />
-    //         <Text>{this.state.textForChecks}</Text>            
-    //       </ScrollView>
-    //     </View>
-    //   );
-    //  }  
     }
   }
 
 const styles = StyleSheet.create({
+  buttonContainerDiv: {
+    flex:1,
+    flexDirection:'row-reverse',
+    margin: 12.5
+  },
   imagePhotoStyling: {
       width: 200,
       height: 200,
@@ -361,17 +355,10 @@ const styles = StyleSheet.create({
   stylingForPostingItem: {
       padding:15,
       borderColor: 'slateblue',
+      margin: 5,
       borderRadius: 1,
       borderWidth: 1,
-      margin: 5
-  },
-  addPostDivContainer:{
-      flex:1,
-      alignItems: 'center',
-      flexDirection: 'row',
-      margin: 0,
-      justifyContent: 'space-evenly',
-      backgroundColor: 'lightblue'
+      
   },
   stylingForNames:{
       flex:1,
@@ -381,56 +368,23 @@ const styles = StyleSheet.create({
       fontSize: 18,
       
   },
+  addPostDivContainer:{
+    flex:1,
+    alignItems: 'center',
+    flexDirection: 'row',
+    margin: 0,
+    justifyContent: 'space-evenly',
+    backgroundColor: 'lightblue'
+  },
   containerDiv: {
       flex: 1,
-      height: 300,
-      width: 393,
+      height: 350,
+      width:  400,
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'flex-start',    
-  },
-  buttonContainerDiv: {
-      flex:1,
-      flexDirection:'row-reverse',
-      justifyContent: 'flex-start',
-      alignItems: 'center',
-      
   }
-
 })
 
 export default ProfileScreen;
 
- // <View
-        // style={{
-        //   flex: 1,
-        //   flexDirection: 'center',
-        //   justifyContent: 'center',
-        //   alignItems: 'center',
-        // }}>
-        // <View>
-        //   <Image
-        //     source={{
-        //       uri: this.state.photo,
-        //     }}
-        //     style={{
-        //       width: 200,
-        //       height: 200,
-        //       borderWidth: 5 
-        //     }}
-        //   />
-        // </View>
-        // {/* request to edit profile picture */}
-        // <Button
-        //             title="Edit profile picture"
-        //             style={{fontSize:15, fontWeight:'light', padding:3, margin:3,}}
-        //             color="darkblue"
-        //             onPress={() => this.searchUser}
-        //         />   
-        // {/* Greeting Messages For the User */}
-
-        // <Text 
-        //     style={{fontSize:18, fontWeight:'bold', padding:5, margin:5}}>
-        //     Welcome Back! We Missed You! + {this.state.nameFirst} + {this.state.nameLast} 
-        //     </Text>        
-        // </View>
